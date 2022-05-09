@@ -11,7 +11,7 @@ import {
 import React from "react";
 import { useRecoilState } from "recoil";
 import { authModalState } from "../../../atoms/authModalAtom";
-import AuthInputs from "./Authinputs";
+import AuthInputs from "./AuthInputs";
 import OAuthButtons from "./OAuthButtons";
 
 const AuthModal: React.FC = () => {
