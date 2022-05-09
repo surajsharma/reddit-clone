@@ -8,14 +8,18 @@ import {
     ModalHeader,
     ModalOverlay
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { useRecoilState } from "recoil";
 import { authModalState } from "../../../atoms/authModalAtom";
+import { auth } from "../../../firebase/clientApp";
 import AuthInputs from "./AuthInputs";
 import OAuthButtons from "./OAuthButtons";
+import ResetPassword from "./ResetPassword";
 
 const AuthModal: React.FC = () => {
     const [modalState, setModalState] = useRecoilState(authModalState);
+    const [user, loading, err] = useAuthState(auth);
 
     const handleClose = () => {
         setModalState((prev) => ({
@@ -23,6 +27,13 @@ const AuthModal: React.FC = () => {
             open: false
         }));
     };
+
+    useEffect(() => {
+        if (user) {
+            handleClose();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     return (
         <>
@@ -48,14 +59,25 @@ const AuthModal: React.FC = () => {
                             justifyContent={"center"}
                             width={"70%"}
                         >
-                            <AuthInputs />
-                            {/* <ResetPassword /> */}
-                        </Flex>
-                        <Text color={"gray.500"} mt={2} fontWeight={500}>
-                            OR
-                        </Text>
-                        <Flex mt={3} width={"100%"}>
-                            <OAuthButtons />
+                            {modalState.view === "login" ||
+                            modalState.view === "signup" ? (
+                                <>
+                                    <Text
+                                        color={"gray.500"}
+                                        mt={2}
+                                        fontWeight={500}
+                                    >
+                                        OR
+                                    </Text>
+                                    <Flex mt={3} width={"100%"}>
+                                        <OAuthButtons />
+                                    </Flex>
+
+                                    <AuthInputs />
+                                </>
+                            ) : (
+                                <ResetPassword />
+                            )}
                         </Flex>
                     </ModalBody>
                 </ModalContent>

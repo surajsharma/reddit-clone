@@ -9,6 +9,7 @@ import { authModalState } from "../../../atoms/authModalAtom";
 import { auth } from "../../../firebase/clientApp";
 import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { match } from "assert";
+import { FIREBASE_ERRORS } from "../../../firebase/errors";
 
 const SignUp: React.FC = () => {
     const [signUpForm, setSignUpForm] = useState({
@@ -123,7 +124,10 @@ const SignUp: React.FC = () => {
                 mt={1}
                 mb={1}
             >
-                {err && err}
+                {err ||
+                    FIREBASE_ERRORS[
+                        userError?.message as keyof typeof FIREBASE_ERRORS
+                    ]}
             </Text>
             <Button
                 type="submit"
