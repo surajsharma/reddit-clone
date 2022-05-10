@@ -1,24 +1,26 @@
 import {
-    Text,
-    Button,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    ModalFooter,
     Box,
-    Input,
-    Flex,
-    Stack,
+    Button,
     Checkbox,
-    Icon
+    Flex,
+    Icon,
+    Input,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Stack,
+    Text
 } from "@chakra-ui/react";
-
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs";
 import { HiLockClosed } from "react-icons/hi";
+import { auth, firestore } from "../../../firebase/clientApp";
 
 type CreateCommunityModalProps = {
     open: boolean;
@@ -31,8 +33,10 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
 }) => {
     const [communityName, setCommunityName] = useState("");
     const [charsRemaining, setCharsRemaining] = useState(21);
-
     const [communityType, setCommunityType] = useState("public");
+    const [err, setErr] = useState("");
+    const [user] = useAuthState(auth);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.value.length > 21) return;
@@ -42,6 +46,58 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
 
     const onCTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setCommunityType(event.target.name);
+    };
+
+    const handleCreateCommunity = async () => {
+        if (err) setErr("");
+        //validate community name
+        const format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+        if (
+            format.test(communityName) ||
+            communityName.length > 21 ||
+            communityName.length < 3
+        ) {
+            setErr(
+                "Community names must be between 3-21 characters, and can only contain letters, numbers, or underscores."
+            );
+
+            return;
+        }
+
+        setLoading(true);
+
+        // create community document in fs
+        try {
+            // 1: get ref to doc
+            const communityDocRef = doc(
+                firestore,
+                "communities",
+                communityName
+            );
+
+            // 2: use getDoc
+            const communityDoc = await getDoc(communityDocRef);
+
+            // 3: if doc exists, return
+            if (communityDoc.exists()) {
+                throw new Error(
+                    `Sorry r/${communityName} is taken. Try another.`
+                );
+            }
+
+            // 4: create community with setdoc
+            await setDoc(communityDocRef, {
+                creatorId: user?.uid,
+                createdAt: serverTimestamp(),
+                numberOfMembers: 1,
+                privacyType: communityType
+            });
+        } catch (error: any) {
+            console.log("handleCreateCommunity error", error);
+            setErr(error.message);
+        }
+
+        setLoading(false);
     };
 
     return (
@@ -94,6 +150,9 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                                 fontSize={"9pt"}
                             >
                                 {charsRemaining} characters remaining
+                            </Text>
+                            <Text fontSize={"9pt"} color={"red"} pt={1}>
+                                {err}
                             </Text>
                             <Box mt={4} mb={4}>
                                 <Text fontSize={15} fontWeight={600} mb={1}>
@@ -190,7 +249,11 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                         >
                             Cancel
                         </Button>
-                        <Button height={"30px"} onClick={() => {}}>
+                        <Button
+                            height={"30px"}
+                            onClick={handleCreateCommunity}
+                            isLoading={loading}
+                        >
                             Create Community
                         </Button>
                     </ModalFooter>
@@ -199,4 +262,5 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
         </>
     );
 };
+
 export default CreateCommunityModal;
