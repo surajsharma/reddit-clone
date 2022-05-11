@@ -39,6 +39,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
     const [loading, setLoading] = useState(false);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setErr("");
         if (event.target.value.length > 21) return;
         setCommunityName(event.target.value);
         setCharsRemaining(21 - event.target.value.length);
