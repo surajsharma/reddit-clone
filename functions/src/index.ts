@@ -7,10 +7,11 @@ const db = admin.firestore();
 
 export const createUserDocument = functions.auth.user().onCreate(async (user) => {
   const newUser = {
-    uid: user.uid,
     email: user.email,
     displayName: user.displayName,
-    providerData: user.providerData
+    // uid: user.uid,
+    // providerData: user.providerData,
+    ...user
   }
   db.collection('users').doc(user.uid).set(newUser);
 })

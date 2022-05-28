@@ -1,5 +1,5 @@
 import { Text, Image, Flex, Button } from "@chakra-ui/react";
-import { User } from "firebase/auth";
+import { User, GoogleAuthProvider } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
 import { useSignInWithGoogle } from "react-firebase-hooks/auth";
@@ -9,10 +9,13 @@ const OAuthButtons: React.FC = () => {
     const [signInWithGoogle, user, loading, error] = useSignInWithGoogle(auth);
 
     const googleLogin = async () => {
-        signInWithGoogle();
-        if (user) {
-            console.log(user);
-        }
+        var provider = new GoogleAuthProvider();
+        provider.setCustomParameters({
+            prompt: "select_account"
+        });
+
+        await signInWithGoogle();
+        // auth.setPersistence("NONE" as any);
     };
 
     const createUserDocument = async (user: User) => {
