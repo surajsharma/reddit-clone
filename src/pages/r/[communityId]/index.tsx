@@ -3,6 +3,7 @@ import { GetServerSidePropsContext } from "next";
 import React from "react";
 import safeJsonStringify from "safe-json-stringify";
 import { Community } from "../../../atoms/communitiesAtom";
+import CreatePostLink from "../../../Components/Community/CreatePostLink";
 import Header from "../../../Components/Community/Header";
 import CommunityNotFound from "../../../Components/Community/NotFound";
 import PageContent from "../../../Components/Layout/PageContent";
@@ -20,7 +21,9 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
         <>
             <Header communityData={communityData} />
             <PageContent>
-                <>LHS</>
+                <>
+                    <CreatePostLink />
+                </>
                 <>RHS</>
             </PageContent>
         </>
