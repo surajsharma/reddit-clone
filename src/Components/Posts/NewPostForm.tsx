@@ -2,6 +2,7 @@ import { Flex, Icon } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { BsLink45Deg, BsMic } from "react-icons/bs";
 import { IoDocumentText, IoImageOutline } from "react-icons/io5";
+import ImageUpload from "./PostForm/ImageUpload";
 import TextInputs from "./PostForm/TextInput";
 import TabItem from "./TabItem";
 type NewPostFormProps = {};
@@ -32,7 +33,6 @@ const formTabs: TabItem[] = [
 
 const NewPostForm: React.FC<NewPostFormProps> = () => {
     const [selectedTab, setSelectedTab] = useState(formTabs[0].title);
-
     const [loading, setLoading] = useState(false);
 
     const [textInputs, setTextInputs] = useState({
@@ -43,7 +43,20 @@ const NewPostForm: React.FC<NewPostFormProps> = () => {
     const [selectedFile, setSelectedFile] = useState<string>();
 
     const handleCreatePost = async () => {};
-    const onSelectImage = () => {};
+
+    const onSelectImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const reader = new FileReader();
+        if (event.target.files?.[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        reader.onload = (readerEvent) => {
+            if (readerEvent.target?.result) {
+                setSelectedFile(readerEvent.target.result as string);
+            }
+        };
+    };
+
     const onTextChange = (
         event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
@@ -76,6 +89,14 @@ const NewPostForm: React.FC<NewPostFormProps> = () => {
                         handleCreatePost={handleCreatePost}
                         onChange={onTextChange}
                         loading={loading}
+                    />
+                )}
+                {selectedTab === "Images & Video" && (
+                    <ImageUpload
+                        selectedFile={selectedFile}
+                        onSelectImage={onSelectImage}
+                        setSelectedTab={setSelectedTab}
+                        setSelectedFile={setSelectedFile}
                     />
                 )}
             </Flex>
